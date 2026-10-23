@@ -5,7 +5,7 @@ Revisión del entorno de desarrollo con Docker, PostgreSQL y Node disponibles.
 ## Ejecutado
 
 - `docker compose config --quiet` en `test-manager-library-3239137-infra`: correcto.
-- `docker compose exec -T api vendor/bin/phpunit`: correcto, 48 pruebas y 65 aserciones.
+- `docker compose exec -T api vendor/bin/phpunit`: correcto, 55 pruebas y 73 aserciones.
 - `docker compose up -d --build api`: correcto; el arranque informó “Nothing to migrate”.
 - `docker compose restart api`: correcto; `/api/v1/health` siguió respondiendo `{"status":"ok"}`.
 - Base limpia temporal: la primera migración creó `public.migrations` y ejecutó las dos migraciones; la segunda respondió “Nothing to migrate”; `migrate:status` mostró ambas en estado `Ran`.
@@ -35,7 +35,7 @@ El ajuste anterior de copiar filas a `library.migrations` fue local y ya no es n
 - Carrera con dos peticiones simultáneas por el último ejemplar (T-13 y RNF-2).
 - Prueba de contrato HTTP completa sobre todas las rutas y códigos (T-16 y RNF-4).
 - Prueba de carga con 5.000 libros y respuesta inferior a 300 ms (RNF-1).
-- Pruebas dedicadas de autenticación, libros, reporte, hasher/token y portadas (T-07, T-08, T-11, T-14 y T-15).
+- Pruebas dedicadas de autenticación, libros, reporte y portadas (T-07, T-08, T-11 y T-15), y del hasher (T-14); el emisor de token ya cuenta con `JwtTokenIssuerTest`.
 - Recorrido autenticado completo de las siete pantallas y comprobación visual en móvil y escritorio (T-22 y T-23).
 - Arranque completo desde un volumen limpio con creación del administrador y login (T-17).
 - Sembrador contra la API real desde un volumen limpio (T-21).

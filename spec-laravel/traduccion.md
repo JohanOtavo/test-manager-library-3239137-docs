@@ -185,7 +185,7 @@ Tres detalles que Laravel no da por defecto:
 | T-11 Reporte | implementado; sin prueba dedicada del reporte | `SqlMostBorrowedQuery` agrupa por valores congelados |
 | T-12 Repositorios | implementado; faltan pruebas de integración PostgreSQL | `app/Adapters/Persistence/Database/` |
 | T-13 Préstamos y testigo de versión | implementado; falta carrera entre peticiones reales | Escritura condicionada; prueba actual con doble; ver §3.1 |
-| T-14 Hash y token | implementado; faltan pruebas de hasher y token | `NativePasswordHasher`, `JwtTokenIssuer` |
+| T-14 Hash y token | implementado; el emisor de token tiene prueba; falta la prueba del hasher | `NativePasswordHasher`, `JwtTokenIssuer`, `JwtTokenIssuerTest` |
 | T-15 Portadas | implementado; falta prueba integrada de subida | `DiskCoverStorage`, tipo validado por contenido |
 | T-16 Rutas y cuerpo de error | implementado; falta prueba de contrato HTTP completa | `routes/api.php`, `ErrorResponder` |
 | T-17 Composición y arranque | implementado; login admin local correcto; falta arranque completo desde volumen limpio | `PortBindingsProvider`, `library:ensure-admin` |
@@ -199,7 +199,7 @@ Tres detalles que Laravel no da por defecto:
 **Validación pendiente:** pruebas de integración contra PostgreSQL real (T-12),
 la carrera con dos peticiones simultáneas (T-13 y RNF-2), la prueba de contrato
 HTTP completa (T-16 y RNF-4), la carga de RNF-1 con 5 000 libros y las pruebas
-dedicadas de T-07, T-08, T-11, T-14 y T-15. El arranque repetible quedó
+dedicadas de T-07, T-08, T-11, T-14 (hasher) y T-15. El arranque repetible quedó
 verificado (T-02 y T-20); falta completar el arranque desde un volumen limpio
 con la creación del administrador (T-17). El detalle de lo ejecutado y de lo que
 falta está en [`estado-validacion.md`](estado-validacion.md).
