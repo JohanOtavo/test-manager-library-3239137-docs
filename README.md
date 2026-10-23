@@ -69,3 +69,19 @@ En cualquiera de las dos carpetas, en este orden:
 | [`test-manager-library-3239137-page`](https://github.com/code-sena/test-manager-library-3239137-page) | Sitio público estático de presentación |
 | [`test-manager-library-3239137-infra`](https://github.com/code-sena/test-manager-library-3239137-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
 | [`test-manager-library-3239137-tool`](https://github.com/code-sena/test-manager-library-3239137-tool) | Utilidades: sembrador de datos de demostración |
+
+---
+
+## La respuesta a esta prueba (añadido del aprendiz)
+
+El spec de arriba es el enunciado y **no se tocó**. La traducción al stack del
+reto está aparte:
+
+| Carpeta | Contenido |
+|---|---|
+| [`spec-laravel/`](spec-laravel/) | Cómo se llevó el spec a React + Laravel: equivalencias de tecnología, las dos discrepancias que trae el spec, las decisiones propias y el estado de las 23 tareas |
+
+Entra por [`spec-laravel/traduccion.md`](spec-laravel/traduccion.md) para ver qué
+se respetó tal cual, qué cambió de forma y por qué. El estado de las
+comprobaciones locales está en
+[`spec-laravel/estado-validacion.md`](spec-laravel/estado-validacion.md).
