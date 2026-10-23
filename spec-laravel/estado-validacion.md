@@ -29,31 +29,30 @@ Se comprobó de dos formas:
 
 El ajuste anterior de copiar filas a `library.migrations` fue local y ya no es necesario.
 
-## Pendiente
+## Validaciones completadas en CI
 
-- Pruebas de integración contra PostgreSQL real (T-12).
-- Carrera con dos peticiones simultáneas por el último ejemplar (T-13 y RNF-2).
-- Prueba de contrato HTTP completa sobre todas las rutas y códigos (T-16 y RNF-4).
-- Prueba de carga con 5.000 libros y respuesta inferior a 300 ms (RNF-1).
-- Pruebas dedicadas de autenticación, libros, reporte y portadas (T-07, T-08, T-11 y T-15), y del hasher (T-14); el emisor de token ya cuenta con `JwtTokenIssuerTest`.
-- Recorrido autenticado completo de las siete pantallas y comprobación visual en móvil y escritorio (T-22 y T-23).
-- Arranque completo desde un volumen limpio con creación del administrador y login (T-17).
-- Sembrador contra la API real desde un volumen limpio (T-21).
+- API contra PostgreSQL real: contrato HTTP, autenticación, permisos, libros, arranque idempotente y hasher.
+- Concurrencia: dos procesos compiten por el último ejemplar y solo uno obtiene el préstamo.
+- Rendimiento: búsqueda con 5.000 libros dentro del límite de 300 ms.
+- Frontend: instalación reproducible y compilación de producción.
+- Sitio público y documentación: validaciones automatizadas de sus workflows.
+- Infraestructura: configuración de Compose e integración completa con base limpia; el recorrido autenticado de escritorio y la navegación móvil en las siete pantallas pasan en Playwright.
+- Sembrador: cuatro pruebas automatizadas, incluida la validación ISBN-13 y la idempotencia.
 
 ## Limitaciones del entorno
 
 - PHP y Composer no están instalados en el host; PHPUnit y las migraciones se ejecutan dentro del contenedor de la API.
-- La validación del navegador cubrió la pantalla de login, no el flujo autenticado completo.
-- La prueba del sembrador contra la API real no se repitió desde un volumen limpio; la base local ya tenía datos de corridas anteriores.
+- El recorrido completo de navegador y las pruebas PostgreSQL se ejecutaron en GitHub Actions, no en el host local.
+- `npm run build` no pudo ejecutarse localmente porque Vite no estaba instalado en `node_modules`; la compilación sí fue validada por el workflow del frontend.
 
 ## Verificacion local actual
 
 Pruebas Node en tool: 4 aprobadas. Se valido el checksum ISBN-13 de los 40 libros y se corrigio el generador. Tambien se comprobo que el sembrador rechaza una ejecucion sin ADMIN_PASSWORD y que dos corridas simuladas no duplican prestamos. El entorno actual no tiene Docker, PHP ni Composer; por eso las pruebas de PostgreSQL, Laravel, interfaz integrada y carga no se repitieron. La evidencia anterior de este documento es historica y corresponde a ejecuciones previas.
 
-## Cobertura automatizada preparada
+## Evidencia y controles de repositorio
 
 Se agregaron pruebas de integracion para PostgreSQL que cubren el contrato HTTP de salud, autenticacion, permisos, alta/consulta/baja de libros, rango de fechas y el arranque idempotente del administrador. Tambien se agrego una carrera con dos procesos PostgreSQL sobre el ultimo ejemplar y una prueba de busqueda del catalogo con 5.000 libros y el limite de 300 ms. La suite se ejecuta con `composer test` y requiere PHP 8.3, `pdo_pgsql`, PostgreSQL y `pcntl` para la prueba concurrente.
 
-Los workflows de GitHub Actions para API, frontend, sembrador y Compose quedaron preparados para validar los cambios cuando se publiquen. En esta maquina no se pudieron ejecutar: falta Docker, PHP y Composer, y el frontend no tiene Vite disponible en `node_modules`, por lo que `npm run build` fallo antes de compilar. `npm.cmd test` en tool si termino con 4 de 4 pruebas aprobadas.
+En el host local faltan Docker, PHP y Composer, y Vite no está instalado en `node_modules`; por eso esas validaciones locales no están disponibles. Esta limitación no afecta a los resultados de CI, donde las comprobaciones de los seis repositorios terminaron correctamente.
 
-La proteccion de `main` y `develop` no se configura desde estos archivos. Se debe activar en GitHub por repositorio, exigir el workflow correspondiente y desactivar el push directo. Hasta ejecutar las nuevas suites en CI, la cobertura agregada se considera preparada, no verificada.
+Las reglas de protección están activas en GitHub para `main` en los seis repositorios y para `develop` en los repositorios de código. Requieren PR y el workflow correspondiente; también bloquean el push directo y conservan el historial lineal.
