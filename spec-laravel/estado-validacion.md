@@ -49,3 +49,11 @@ El ajuste anterior de copiar filas a `library.migrations` fue local y ya no es n
 ## Verificacion local actual
 
 Pruebas Node en tool: 4 aprobadas. Se valido el checksum ISBN-13 de los 40 libros y se corrigio el generador. Tambien se comprobo que el sembrador rechaza una ejecucion sin ADMIN_PASSWORD y que dos corridas simuladas no duplican prestamos. El entorno actual no tiene Docker, PHP ni Composer; por eso las pruebas de PostgreSQL, Laravel, interfaz integrada y carga no se repitieron. La evidencia anterior de este documento es historica y corresponde a ejecuciones previas.
+
+## Cobertura automatizada preparada
+
+Se agregaron pruebas de integracion para PostgreSQL que cubren el contrato HTTP de salud, autenticacion, permisos, alta/consulta/baja de libros, rango de fechas y el arranque idempotente del administrador. Tambien se agrego una carrera con dos procesos PostgreSQL sobre el ultimo ejemplar y una prueba de busqueda del catalogo con 5.000 libros y el limite de 300 ms. La suite se ejecuta con `composer test` y requiere PHP 8.3, `pdo_pgsql`, PostgreSQL y `pcntl` para la prueba concurrente.
+
+Los workflows de GitHub Actions para API, frontend, sembrador y Compose quedaron preparados para validar los cambios cuando se publiquen. En esta maquina no se pudieron ejecutar: falta Docker, PHP y Composer, y el frontend no tiene Vite disponible en `node_modules`, por lo que `npm run build` fallo antes de compilar. `npm.cmd test` en tool si termino con 4 de 4 pruebas aprobadas.
+
+La proteccion de `main` y `develop` no se configura desde estos archivos. Se debe activar en GitHub por repositorio, exigir el workflow correspondiente y desactivar el push directo. Hasta ejecutar las nuevas suites en CI, la cobertura agregada se considera preparada, no verificada.
