@@ -45,3 +45,7 @@ El ajuste anterior de copiar filas a `library.migrations` fue local y ya no es n
 - PHP y Composer no están instalados en el host; PHPUnit y las migraciones se ejecutan dentro del contenedor de la API.
 - La validación del navegador cubrió la pantalla de login, no el flujo autenticado completo.
 - La prueba del sembrador contra la API real no se repitió desde un volumen limpio; la base local ya tenía datos de corridas anteriores.
+
+## Verificacion local actual
+
+Pruebas Node en tool: 4 aprobadas. Se valido el checksum ISBN-13 de los 40 libros y se corrigio el generador. Tambien se comprobo que el sembrador rechaza una ejecucion sin ADMIN_PASSWORD y que dos corridas simuladas no duplican prestamos. El entorno actual no tiene Docker, PHP ni Composer; por eso las pruebas de PostgreSQL, Laravel, interfaz integrada y carga no se repitieron. La evidencia anterior de este documento es historica y corresponde a ejecuciones previas.
