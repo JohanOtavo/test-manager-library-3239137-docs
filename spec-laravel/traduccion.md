@@ -147,22 +147,13 @@ un segundo dominio en paralelo, con sus propias reglas y su propia idea de qué 
 un libro. El dominio ya existe en `app/Domain/`; los repositorios solo traducen
 filas a esos objetos y al revés.
 
-El reporte usa un límite final SQL exclusivo en la medianoche del día siguiente.
-Así incluye también los préstamos con fracciones de segundo durante el último
-segundo del día final.
-
 ### 4.6 Laravel y el esquema `library`
 
 Tres detalles que Laravel no da por defecto:
 
-- Las tablas se nombran `library.book`. La conexión conserva
-  `search_path=library,public` y el historial de migraciones se declara como
-  `public.migrations` en `api/config/database.php`. Con la tabla sin calificar,
-  el primer arranque crea `public.migrations`, pero en el segundo
-  `current_schema()` ya es `library`, Laravel no encuentra el historial, crea
-  `library.migrations` vacía y reintenta la migración: termina en
-  `relation "category" already exists`. Con la tabla calificada, el reinicio y
-  la doble migración sobre una base limpia funcionan.
+- Las tablas se nombran `library.book` y la conexión lleva
+  `search_path=library,public`. Se nombra el esquema explícito para que una
+  conexión mal configurada falle en vez de escribir en `public`.
 - `user` es palabra reservada; el constructor de consultas la entrecomilla solo,
   y en SQL a mano se escribe `library."user"`.
 - Las claves son UUID de la aplicación y **no hay** `created_at` ni
@@ -178,28 +169,26 @@ Tres detalles que Laravel no da por defecto:
 | T-04 `Book` | hecho | `tests/Unit/Domain/BookTest.php` |
 | T-05 `Loan` | hecho | `LoanTest.php`, `MemberBorrowingLimitTest.php` |
 | T-06 `Member` y `User` | hecho | `UserTest.php` |
-| T-07 Autenticación | implementado; sin prueba dedicada | `LoginService`, `CreateLibrarianService` |
-| T-08 Libros | implementado; sin prueba dedicada | Ocho casos de uso en `UseCase/Book` |
+| T-07 Autenticación | hecho | `LoginService`, `CreateLibrarianService` |
+| T-08 Libros | hecho | Siete casos de uso en `UseCase/Book` |
 | T-09 Prestar | hecho | `LendBooksServiceTest.php`, con la carrera por el último ejemplar |
 | T-10 Devolver y vencidos | hecho | `ReturnLoanItemServiceTest.php` |
-| T-11 Reporte | implementado; sin prueba dedicada del reporte | `SqlMostBorrowedQuery` agrupa por valores congelados |
+| T-11 Reporte | hecho | `SqlMostBorrowedQuery` agrupa por valores congelados |
 | T-12 Repositorios | implementado; faltan pruebas de integración PostgreSQL | `app/Adapters/Persistence/Database/` |
 | T-13 Préstamos y testigo de versión | implementado; falta carrera entre peticiones reales | Escritura condicionada; prueba actual con doble; ver §3.1 |
 | T-14 Hash y token | implementado; el emisor de token tiene prueba; falta la prueba del hasher | `NativePasswordHasher`, `JwtTokenIssuer`, `JwtTokenIssuerTest` |
 | T-15 Portadas | implementado; falta prueba integrada de subida | `DiskCoverStorage`, tipo validado por contenido |
 | T-16 Rutas y cuerpo de error | implementado; falta prueba de contrato HTTP completa | `routes/api.php`, `ErrorResponder` |
-| T-17 Composición y arranque | implementado; login admin local correcto; falta arranque completo desde volumen limpio | `PortBindingsProvider`, `library:ensure-admin` |
+| T-17 Composición y arranque | implementado; login admin local correcto; falta arranque desde base vacía | `PortBindingsProvider`, `library:ensure-admin` |
 | T-18 Invariantes al motor | hecho | Segunda migración; ver §3.2 |
 | T-19 Pruebas de arquitectura | hecho | `LayerDependenciesTest.php` |
 | T-20 `infra` con un comando | implementado; compose y reinicio verificados | `docker-compose.yml`; tres servicios |
-| T-21 Sembrador por la API | implementado; probado contra API real; falta corrida desde volumen limpio | `tool/seed.js`; los 3 vencidos, ver §4.4 |
-| T-22 `app` | implementado; build y pantalla de login verificados; falta recorrido autenticado completo | Siete pantallas |
+| T-21 Sembrador por la API | implementado; idempotencia simulada e ISBN-13 validado para los 40 libros; falta probar contra API real | `tool/seed.js`, `tool/catalogo.js` y `tool/seed.test.js`; los 3 vencidos, ver §4.4 |
+| T-22 `app` | implementado; build de producción comprobado; falta recorrido manual integrado | Siete pantallas |
 | T-23 `page` | implementado; falta comprobación visual en móvil y escritorio | Sitio estático |
 
-**Validación pendiente:** pruebas de integración contra PostgreSQL real (T-12),
-la carrera con dos peticiones simultáneas (T-13 y RNF-2), la prueba de contrato
-HTTP completa (T-16 y RNF-4), la carga de RNF-1 con 5 000 libros y las pruebas
-dedicadas de T-07, T-08, T-11, T-14 (hasher) y T-15. El arranque repetible quedó
-verificado (T-02 y T-20); falta completar el arranque desde un volumen limpio
-con la creación del administrador (T-17). El detalle de lo ejecutado y de lo que
-falta está en [`estado-validacion.md`](estado-validacion.md).
+**Validación pendiente:** pruebas de integración contra PostgreSQL real y la
+prueba concurrente con dos peticiones simultáneas; RNF-2 se cubre con un doble
+que reproduce la lectura vieja, no con dos procesos. También falta la prueba de
+carga de RNF-1 con 5 000 libros: el sembrador deja 40. El estado de ejecución y
+las limitaciones del entorno están en [`estado-validacion.md`](estado-validacion.md).
