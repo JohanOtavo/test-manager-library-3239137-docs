@@ -6,6 +6,9 @@ Revisión del entorno de desarrollo con Docker, PostgreSQL y Node disponibles.
 
 - `docker compose config --quiet` en `test-manager-library-3239137-infra`: correcto.
 - `docker compose exec -T api vendor/bin/phpunit`: correcto, 48 pruebas y 65 aserciones.
+- `docker compose up -d --build api`: correcto; el arranque informó “Nothing to migrate”.
+- `docker compose restart api`: correcto; `/api/v1/health` siguió respondiendo `{"status":"ok"}`.
+- Base limpia temporal: la primera migración creó `public.migrations` y ejecutó las dos migraciones; la segunda respondió “Nothing to migrate”; `migrate:status` mostró ambas en estado `Ran`.
 - `npm run build` en `test-manager-library-3239137-app`: correcto, 42 módulos.
 - `node --check` para `seed.js`, `seed.test.js` y `catalogo.js`: correcto.
 - `npm test` en `test-manager-library-3239137-tool`: correcto; la prueba simula la API, crea 15 préstamos en la primera pasada y confirma que la segunda no agrega más.
@@ -17,14 +20,14 @@ Revisión del entorno de desarrollo con Docker, PostgreSQL y Node disponibles.
 
 ## Arranque repetible
 
-El arranque funciona con un volumen limpio, pero falla al reiniciar sobre una base ya migrada:
+El historial de migraciones se declara como `public.migrations` en `api/config/database.php`. Así Laravel no depende de que el esquema `library` exista para encontrar las migraciones ya ejecutadas.
 
-- `docker compose up -d api` termina con `Exited (1)`.
-- El error es `SQLSTATE[42P07]: Duplicate table: relation "category" already exists`.
-- La causa está en el `search_path`: con `library,public`, el primer arranque crea `public.migrations`; en el segundo `current_schema()` ya es `library`, Laravel no ve ese historial, crea `library.migrations` vacía y reintenta la migración.
-- Ejecutar con `DB_SCHEMA=public` confirma el diagnóstico: `migrate:status` ve las dos migraciones y `migrate` responde “Nothing to migrate”.
+Se comprobó de dos formas:
 
-La corrección identificada es dejar `public` primero en `api/config/database.php` (o calificar la tabla de migraciones) y volver a probar el reinicio. Mientras tanto, la base local se dejó operativa copiando las dos filas de `public.migrations` a `library.migrations`; es un ajuste de la base local, no del repositorio.
+- Reinicio sobre la base existente: el contenedor volvió a arrancar y la API respondió.
+- Base limpia temporal: la primera ejecución creó el historial y las tablas; la segunda no reejecutó nada.
+
+El ajuste anterior de copiar filas a `library.migrations` fue local y ya no es necesario.
 
 ## Pendiente
 
@@ -34,7 +37,8 @@ La corrección identificada es dejar `public` primero en `api/config/database.ph
 - Prueba de carga con 5.000 libros y respuesta inferior a 300 ms (RNF-1).
 - Pruebas dedicadas de autenticación, libros, reporte, hasher/token y portadas (T-07, T-08, T-11, T-14 y T-15).
 - Recorrido autenticado completo de las siete pantallas y comprobación visual en móvil y escritorio (T-22 y T-23).
-- Corregir el `search_path` y verificar el arranque repetible (T-02, T-17 y T-20).
+- Arranque completo desde un volumen limpio con creación del administrador y login (T-17).
+- Sembrador contra la API real desde un volumen limpio (T-21).
 
 ## Limitaciones del entorno
 

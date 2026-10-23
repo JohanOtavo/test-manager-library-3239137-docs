@@ -155,15 +155,14 @@ segundo del día final.
 
 Tres detalles que Laravel no da por defecto:
 
-- Las tablas se nombran `library.book` y la conexión debe llevar
-  `search_path=public,library`. El esquema de las tablas de negocio se escribe
-  explícito; `public` va primero para que la tabla de migraciones de Laravel
-  viva siempre ahí. Con `library,public` el primer arranque crea
-  `public.migrations`, pero en el segundo `current_schema()` ya es `library`,
-  Laravel no encuentra el historial, crea `library.migrations` vacía y reintenta
-  la migración: termina en `relation "category" already exists`. La corrección
-  queda pendiente en `api/config/database.php`; mientras tanto, el arranque
-  sobre una base ya migrada no es repetible.
+- Las tablas se nombran `library.book`. La conexión conserva
+  `search_path=library,public` y el historial de migraciones se declara como
+  `public.migrations` en `api/config/database.php`. Con la tabla sin calificar,
+  el primer arranque crea `public.migrations`, pero en el segundo
+  `current_schema()` ya es `library`, Laravel no encuentra el historial, crea
+  `library.migrations` vacía y reintenta la migración: termina en
+  `relation "category" already exists`. Con la tabla calificada, el reinicio y
+  la doble migración sobre una base limpia funcionan.
 - `user` es palabra reservada; el constructor de consultas la entrecomilla solo,
   y en SQL a mano se escribe `library."user"`.
 - Las claves son UUID de la aplicación y **no hay** `created_at` ni
@@ -174,7 +173,7 @@ Tres detalles que Laravel no da por defecto:
 | Tarea | Estado | Evidencia |
 |---|---|---|
 | T-01 Esqueleto y `/health` | implementado; smoke local correcto | `GET /api/v1/health` respondió `{"status":"ok"}` |
-| T-02 Migración inicial con semilla | implementado; esquema verificado; reinicio sobre base existente falla (ver §4.6) | Seis tablas de negocio y cinco categorías; historial de Laravel en `public.migrations` |
+| T-02 Migración inicial con semilla | implementado; esquema y arranque repetible verificados | Seis tablas de negocio y cinco categorías; historial en `public.migrations`; doble migración sobre base limpia sin cambios |
 | T-03 Objetos de valor | hecho | `tests/Unit/Domain/ValueObjectsTest.php` |
 | T-04 `Book` | hecho | `tests/Unit/Domain/BookTest.php` |
 | T-05 `Loan` | hecho | `LoanTest.php`, `MemberBorrowingLimitTest.php` |
@@ -189,10 +188,10 @@ Tres detalles que Laravel no da por defecto:
 | T-14 Hash y token | implementado; faltan pruebas de hasher y token | `NativePasswordHasher`, `JwtTokenIssuer` |
 | T-15 Portadas | implementado; falta prueba integrada de subida | `DiskCoverStorage`, tipo validado por contenido |
 | T-16 Rutas y cuerpo de error | implementado; falta prueba de contrato HTTP completa | `routes/api.php`, `ErrorResponder` |
-| T-17 Composición y arranque | implementado; login admin local correcto; falta arranque desde base vacía | `PortBindingsProvider`, `library:ensure-admin` |
+| T-17 Composición y arranque | implementado; login admin local correcto; falta arranque completo desde volumen limpio | `PortBindingsProvider`, `library:ensure-admin` |
 | T-18 Invariantes al motor | hecho | Segunda migración; ver §3.2 |
 | T-19 Pruebas de arquitectura | hecho | `LayerDependenciesTest.php` |
-| T-20 `infra` con un comando | implementado; compose levanta en base limpia; reinicio falla (ver §4.6) | `docker-compose.yml`; tres servicios |
+| T-20 `infra` con un comando | implementado; compose y reinicio verificados | `docker-compose.yml`; tres servicios |
 | T-21 Sembrador por la API | implementado; probado contra API real; falta corrida desde volumen limpio | `tool/seed.js`; los 3 vencidos, ver §4.4 |
 | T-22 `app` | implementado; build y pantalla de login verificados; falta recorrido autenticado completo | Siete pantallas |
 | T-23 `page` | implementado; falta comprobación visual en móvil y escritorio | Sitio estático |
@@ -200,6 +199,7 @@ Tres detalles que Laravel no da por defecto:
 **Validación pendiente:** pruebas de integración contra PostgreSQL real (T-12),
 la carrera con dos peticiones simultáneas (T-13 y RNF-2), la prueba de contrato
 HTTP completa (T-16 y RNF-4), la carga de RNF-1 con 5 000 libros y las pruebas
-dedicadas de T-07, T-08, T-11, T-14 y T-15. El arranque repetible sobre una base
-ya migrada queda bloqueado por el `search_path` descrito en §4.6. El detalle de
-lo ejecutado y de lo que falta está en [`estado-validacion.md`](estado-validacion.md).
+dedicadas de T-07, T-08, T-11, T-14 y T-15. El arranque repetible quedó
+verificado (T-02 y T-20); falta completar el arranque desde un volumen limpio
+con la creación del administrador (T-17). El detalle de lo ejecutado y de lo que
+falta está en [`estado-validacion.md`](estado-validacion.md).
